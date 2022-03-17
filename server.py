@@ -1,20 +1,22 @@
-import socket 
+import socket
 import json
 
-HOST="127.0.0.1"
-PORT=22007
+HOST='127.0.0.1'
+PORT=22009
 
 with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
-    s.bind((HOST,PORT))
+    s.bind((HOST, PORT))#tupla: array non modificabile
+    s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     s.listen()
-    print("[*] In ascolto su %s: %d"%(HOST,PORT))
-    clientscoket, address=s.accept()
-    with clientscoket as cs:
-        print("Connessione da ",address)
+    print("[*] In ascolto su %s:%d "%(HOST, PORT))
+    #conversione del client
+    clientsocket, address=s.accept()#accetta la conversione
+    with clientsocket as cs:
+        print("Connessione da ", address)
         while True:
             data=cs.recv(1024)
-            if not data:
-                break 
+            if not data: #se data è un vettore vuoto risulta false; sennò true/if len(data)==0/se è vuoto esce, sennò continua
+                break
             data=data.decode()
             data=json.loads(data)
             primoNumero=data['primoNumero']
@@ -35,6 +37,9 @@ with socket.socket(socket.AF_INET,socket.SOCK_STREAM) as s:
             elif operazione=="%":
                 ris=primoNumero%secondoNumero
             else:
-                ris="Operazione non riconosciuta"
-            ris=str(ris)
-            cs.sendall(ris.encode("UTF-8")) #manda il vettore in risposta al client
+                ris="Operazione non riuscita"
+            ris=str(ris)#Casting a stringa
+            #risposta al client
+            cs.sendall(ris.encode("UTF-8"))
+            #Fine parte server
+                
