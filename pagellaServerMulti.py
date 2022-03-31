@@ -6,7 +6,7 @@ import json
 
 
 SERVER_ADDRESS = '127.0.0.1'
-SERVER_PORT = 22225
+SERVER_PORT = 22006
 
 #Versione 1 
 def ricevi_comandi1(sock_service,addr_client):

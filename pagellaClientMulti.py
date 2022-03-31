@@ -10,7 +10,7 @@ import json
 import pprint
 
 SERVER_ADDRESS = '127.0.0.1'
-SERVER_PORT = 22225
+SERVER_PORT = 22006
 NUM_WORKERS=4
 
 #Versione 1 
@@ -26,21 +26,10 @@ def genera_richieste1(num,address,port):
     #1. Generazione casuale:
     
     #   di uno studente (valori ammessi: 5 cognomi a caso tra cui il tuo cognome)
-    studente=random.randint(0,4)
-    studente=""
-    if (studente==0):
-        studente="Fulginiti "
-    elif (studente==1):
-        studente="Rossi "
-    elif (studente==2):
-        studente="Bianchi "
-    elif (studente==3):
-        studente="D alba "
-    else:
-        studente="Faulisi "
+    studenti=['Rossi','Faulisi','Bianchi','Fulginiti','D alba']
     #   di una materia (valori ammessi: Matematica, Italiano, inglese, Storia e Geografia)
-    materia=random.randint(0,4)
-    materia=""
+    materia=['matematica', 'italiano', 'inglese', 'storia e geografia',]
+    
     if (materia==0):
         materia="matematica "
     elif (materia==1):
@@ -56,6 +45,9 @@ def genera_richieste1(num,address,port):
     voto=random.randint(1, 10)
     #   delle assenze (valori ammessi 1..5) 
     assenze=random.randint(1,5)
+
+    materie=materia[random.randint(0,3)]
+    studente=studenti[random.randint(0,4)]
     #2. comporre il messaggio, inviarlo come json
     messaggio={
         'studente':studente,
@@ -63,17 +55,27 @@ def genera_richieste1(num,address,port):
         'voto':voto,
         'assenze':assenze      
     }
+    print(f"dati inviati al server {messaggio}")
     messaggio=json.dumps(messaggio)
     s.sendall(messaggio.encode("UTF-8"))
     data=s.recv(1024)
+    data=data-decode()
+    data=json.loads(data)
+    print(f"dati ricevuti dal server {data}")
     if not data:
         print(f"{threading.current_thread().name}: Server non risponde. Exit")
     else:
         print(f"{threading.current_thread().name}: Voto: {data.decode()}") # trasforma il vettore di byte in stringa
-    s.close()
-    end_time_thread=time.time()
+    
+
+
     #   esempio: {'studente': 'Studente4', 'materia': 'Italiano', 'voto': 2, 'assenze': 3}
+    studente=data['studente']
+    materia=data['materia']
     #3. ricevere il risultato come json: {'studente':'Studente4','materia':'italiano','valutazione':'Gravemente insufficiente'}
+    print(f"{threading.current_thread().name}: La valutazione di {data['studente']} in {data['materia']} è {data['valuzione']}")
+s.close()
+end_time_thread=time.time()
 if __name__ == '__main__':
     start_time=time.time()
     # 3 ciclo per chiamare NUM_WORKERS volte la funzione genera richieste alla quale passo i parametri (num,SERVER_ADDRESS, SERVER_PORT)
@@ -114,16 +116,52 @@ if __name__ == '__main__':
 
 #Versione 2 
 def genera_richieste2(num,address,port):
+
+    try:
+        s=socket.socket()
+        s.connect((address,port))
+        print(f"{threading.current_thread().name} {num+1} Connessione al server: {address}:{port}")
+    except:
+        print(f"{threading.current_thread().name} Qualcosa è andato storto, sto uscendo...\n")
   #....
   #   1. Generazione casuale di uno studente(valori ammessi: 5 cognomi a caso scelti da una lista)
-  #pagella=['Rossi','Faulisi','Bianchi','Fulginiti','D alba']
+    studenti=['Rossi','Marchesi','Bianchi','Fulginiti','D alba']
   #   Per ognuna delle materie ammesse: Matematica, Italiano, inglese, Storia e Geografia)
   #materia=[]
+    materia=['matematica', 'italiano', 'inglese', 'storia e geografia',]
   #   generazione di un voto (valori ammessi 1 ..10)
+    voto=random.randint(1, 10)
   #   e delle assenze (valori ammessi 1..5) 
+    assenze=random.randint(1,5)
   #   esempio: pagella={"Cognome1":[("Matematica",8,1), ("Italiano",6,1), ("Inglese",9.5,3), ("Storia",8,2), ("Geografia",8,1)]}
+    materie=materia[random.randint(0,3)]
+    studente=studenti[random.randint(0,4)]
   #2. comporre il messaggio, inviarlo come json
+   messaggio={
+        'studente':studente,
+        'materia': materia,
+        'voto':voto,
+        'assenze':assenze      
+    }
+    print(f"dati inviati al server {messaggio}")
+    messaggio=json.dumps(messaggio)
+    s.sendall(messaggio.encode("UTF-8"))
+    data=s.recv(1024)
+    data=data-decode()
+    data=json.loads(data)
+    print(f"dati ricevuti dal server {data}")
+    if not data:
+        print(f"{threading.current_thread().name}: Server non risponde. Exit")
+    else:
+        print(f"{threading.current_thread().name}: Voto: {data.decode()}")
   #3  ricevere il risultato come json {'studente': 'Cognome1', 'media': 8.0, 'assenze': 8}
+    studente=data['studente']
+    materia=data['materia']
+    print(f"{threading.current_thread().name}: La valutazione di {data['studente']} in {data['materia']} è {data['valuzione']}")
+s.close()
+end_time_thread=time.time()
+if __name__ == '__main__':
+    start_time=time.time()
     pass
 #Versione 3
 def genera_richieste3(num,address,port):
